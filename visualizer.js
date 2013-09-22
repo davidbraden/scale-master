@@ -51,6 +51,7 @@ $(document).ready(function() {
 	
 	function analyseData() {
 		var data = getData();
+		drawWave(data);
 		var parsedData = parseData(data);
 		parsedData.sort(function(a, b) { return b['amplitude'] - a['amplitude']; });
 		
