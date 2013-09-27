@@ -1,13 +1,13 @@
 $(document).ready(function() {
 	window.AudioContext = window.AudioContext||window.webkitAudioContext;	
 	
-	var canvas = document.getElementById('visualizerCanvas'),
+	var canvas1 = document.getElementById('visualizerCanvas1')
+	    canvas2 = document.getElementById('visualizerCanvas2'),
 		audioContext = new AudioContext(),
-		analyser = audioContext.createAnalyser(),
 		javascriptNode = audioContext.createScriptProcessor(4096, 1, 1),
 		highPassFilter = audioContext.createBiquadFilter(),
 		lowPassFilter = audioContext.createBiquadFilter();
-	var ctx  = canvas.getContext('2d');
+	var fft = new FFT(4096, 44100);
 	
 	var previousAverage = 0;
 	
@@ -26,8 +26,7 @@ $(document).ready(function() {
 		var source = audioContext.createMediaStreamSource(localMediaStream);
 		source.connect(lowPassFilter);
 		lowPassFilter.connect(highPassFilter);
-		highPassFilter.connect(analyser);
-		analyser.connect(javascriptNode);
+		highPassFilter.connect(javascriptNode);
 		javascriptNode.onaudioprocess = analyseData;
 		javascriptNode.connect(audioContext.destination);
 	};
@@ -41,20 +40,13 @@ $(document).ready(function() {
 		lowPassFilter.frequency = 4000;
 	}
 
-	function getData() {
-		var array = new Uint8Array(8192);
-		analyser.smoothingTimeConstant = 0.1;
-        analyser.fftSize = 2048;
-        analyser.minDecibels = -70;
-        analyser.maxDecibels = -30;
-		analyser.getByteFrequencyData(array);
-		return array;
-	}
-	
-	function analyseData() {
-		var data = getData();
-		drawWave(data);
-		var parsedData = parseData(data);
+	function analyseData(audioEvent) {
+		var timeData = audioEvent.inputBuffer.getChannelData(0);
+		fft.forward(timeData);
+		var frequencyData = fft.spectrum;
+		drawWave(timeData);
+		drawSpectrum(frequencyData);
+		var parsedData = parseData(frequencyData);
 		parsedData.sort(function(a, b) { return b['amplitude'] - a['amplitude']; });
 		
 		var average = getAverage(parsedData);
@@ -62,9 +54,6 @@ $(document).ready(function() {
 			console.log("New core frequency : " + parsedData[0].frequency);
 			previousAverage = average;
 		}
-		
-		
-		
 	}
 	
 	function parseData(data) {
@@ -76,15 +65,30 @@ $(document).ready(function() {
 	}
 
     function drawWave(wave) {
+       draw(canvas1, 0.2, 4, wave);
+    };
+    
+    function drawSpectrum(wave) {
+        draw(canvas2, 1, 32, wave);
+    };
+    
+    
+    function draw(canvas, horizontalScaling, verticalScaling, wave) {
+        var ctx  = canvas.getContext('2d')
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        var grad= ctx.createLinearGradient(0, 200, 0, 0);
+        grad.addColorStop(0, "yellow");
+        grad.addColorStop(1, "red");
+        ctx.strokeStyle = grad;
     	ctx.clearRect(0, 0, canvas.width, canvas.height);
     	var time = 0;
     	for (var i = 0; i < wave.length; i++) {
     		ctx.beginPath();
-    		ctx.moveTo(time, 0);
-    		ctx.lineTo(time, wave[i] * canvas.height/255) ;
+    		ctx.moveTo(time, 200);
+    		ctx.lineTo(time, 150 - (wave[i] * canvas.height*verticalScaling));
     		ctx.stroke();
 	    	ctx.closePath();	
-    		time = time + 10;
+    		time = time + horizontalScaling;
     	};
     };
 

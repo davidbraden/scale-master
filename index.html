@@ -1,14 +1,25 @@
 <html>
     <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href="/stylesheets/bootstrap.min.css" rel="stylesheet" media="screen">
+        <link href="style.css" rel="stylesheet">
+        <script src="dsp.js"></script>
         <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 		<script src="visualizer.js"></script>
     </head>
 	<body>
+	    <div class="container" />
 	    <h1>
 		    Audio visualization test
 		</h1>
-		<canvas id="visualizerCanvas" width="800", height="200"></canvas>
-		<audio id="track"></audio>	
+		<div>
+		    <canvas id="visualizerCanvas1"></canvas>
+		</div>
+		<div>
+		    <canvas id="visualizerCanvas2"></canvas>
+		</div>
+		<audio id="track"></audio>
+		</div>
     </body>
 </html>
 
