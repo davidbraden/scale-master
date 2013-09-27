@@ -1,6 +1,8 @@
 $(document).ready(function() {
+	window.AudioContext = window.AudioContext||window.webkitAudioContext;	
+	
 	var canvas = document.getElementById('visualizerCanvas'),
-		audioContext = new webkitAudioContext(),
+		audioContext = new AudioContext(),
 		analyser = audioContext.createAnalyser(),
 		javascriptNode = audioContext.createScriptProcessor(4096, 1, 1),
 		highPassFilter = audioContext.createBiquadFilter(),
@@ -10,8 +12,8 @@ $(document).ready(function() {
 	var previousAverage = 0;
 	
 	setUpFilters();
-	
-	navigator.webkitGetUserMedia (
+	navigator.getMedia = (navigator.getUserMedia||navigator.webkitGetUserMedia);	
+	navigator.getMedia (
 			   {audio: true},
 			   linkAudioNodes,
 			   function(err) {
