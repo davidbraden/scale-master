@@ -28,7 +28,7 @@ require(['jquery', 'analysis', 'visualizer'], function(jquery, analysis, visuali
             source.connect(lowPassFilter);
             lowPassFilter.connect(highPassFilter);
             highPassFilter.connect(javascriptNode);
-            javascriptNode.onaudioprocess = function (audioEvent) { analysis.analyseData(audioEvent);};
+            javascriptNode.onaudioprocess = function (audioEvent) { analysis.processAudioEvent(audioEvent);};
             javascriptNode.connect(audioContext.destination);
         }
 

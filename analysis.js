@@ -1,41 +1,45 @@
-define(['visualizer', 'dsp'], function(visualizer) {
+define(['visualizer', 'dsp', 'streamHistory'], function(visualizer,dsp, streamHistory) {
     var fft = new FFT(4096, 44100);
 
-    var previousAverage = 0;
-
-    function analyseData(audioEvent) {
+    function processAudioEvent(audioEvent) {
         var timeData = audioEvent.inputBuffer.getChannelData(0);
         fft.forward(timeData);
         var frequencyData = fft.spectrum;
+
+        streamHistory.updateHistory(timeData);
+        updateNote(timeData, frequencyData);
+        if (streamHistory.note.timeSamples.length  > 0) {
+            visualizer.drawNote(streamHistory.note.getWave());
+        }
+
         visualizer.drawWave(timeData);
         visualizer.drawSpectrum(frequencyData);
-        var parsedData = parseData(frequencyData);
-        parsedData.sort(function(a, b) { return b['amplitude'] - a['amplitude']; });
-
-        var average = getAverage(parsedData);
-        if (average >= previousAverage) {
-            console.log("New core frequency : " + parsedData[0].frequency);
-            previousAverage = average;
-        }
     }
 
-    function parseData(data) {
-        var parsedData = [];
-        for (var i = 0; i < data.length;  i++) {
-            parsedData.push( { 'frequency' : i, 'amplitude' : data[i]});
+    function updateNote(timeData, frequencyData) {
+        var average = getAverage(timeData);
+        var previousAverage = getAverage(streamHistory.previousBuffer);
+        if (average < 0.002) {
+            streamHistory.note.timeSamples = [];
+
+        } else if (average > previousAverage) {
+            console.log('note data added');
+            streamHistory.note.timeSamples = [timeData];
+        } else {
+            console.log('note data added');
+            streamHistory.note.timeSamples.push(timeData);
         }
-        return parsedData;
     }
 
     function getAverage(array) {
         var sum = 0;
-        array.forEach(function(element) {
-            sum += element['amplitude'];
-        });
+        for (var i=0; i < array.length; i++) {
+            sum += Math.abs(array[i]);
+        }
         return sum / array.length;
     }
 
     return {
-        analyseData : analyseData
+        processAudioEvent : processAudioEvent
     }
 });

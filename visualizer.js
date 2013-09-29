@@ -2,17 +2,47 @@ define(function() {
 
     var canvas1 = document.getElementById('visualizerCanvas1');
     var canvas2 = document.getElementById('visualizerCanvas2');
+    var canvas3 = document.getElementById('visualizerCanvas3');
 
     function drawWave(wave) {
-        draw(canvas1, 0.25, 4, wave);
+        var ctx = setUpCanvas(canvas1);
+        draw(ctx, 1, 1024, wave);
     }
 
     function drawSpectrum(wave) {
-        draw(canvas2, 4, 32, wave);
+        var ctx = setUpCanvas(canvas2);
+        var time = 0;
+        for (var i = 0; i < wave.length; i++) {
+            ctx.beginPath();
+            ctx.moveTo(time, 256);
+            ctx.lineTo(time, 256 - (wave[i] * 1024*32));
+            ctx.stroke();
+            ctx.closePath();
+            time = time + 4;
+        }
     }
 
+    function drawNote(wave) {
+        var ctx = setUpCanvas(canvas3);
+        var x = 1024/wave.length;
+        var y = 256;
+        var time = 0;
+        draw(ctx, x, y, wave);
+    }
 
-    function draw(canvas, horizontalScaling, verticalScaling, wave) {
+    function draw(ctx, x, y, wave) {
+        var time = 0;
+        for (var i = 0; i < wave.length; i++) {
+            ctx.beginPath();
+            ctx.moveTo(time, 128 + (y * wave[i]));
+            ctx.lineTo(time, 128 -  (y * wave[i]));
+            ctx.stroke();
+            ctx.closePath();
+            time = time + x;
+        }
+    }
+
+    function setUpCanvas(canvas) {
         var ctx  = canvas.getContext('2d');
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         var grad= ctx.createLinearGradient(0, 256, 0, 0);
@@ -20,19 +50,12 @@ define(function() {
         grad.addColorStop(1, "red");
         ctx.strokeStyle = grad;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        var time = 0;
-        for (var i = 0; i < wave.length; i++) {
-            ctx.beginPath();
-            ctx.moveTo(time, 256);
-            ctx.lineTo(time, 256 - (wave[i] * canvas.height*verticalScaling));
-            ctx.stroke();
-            ctx.closePath();
-            time = time + horizontalScaling;
-        }
+        return ctx;
     }
 
     return {
         drawWave : drawWave,
-        drawSpectrum : drawSpectrum
+        drawSpectrum : drawSpectrum,
+        drawNote : drawNote
     }
 });
