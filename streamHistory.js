@@ -2,7 +2,7 @@ define(function() {
     var currentSample = 0;
     var note = {
         timeSamples : [],
-        frequency : null,
+        pitch : null,
         getWave : function() {
             var wave = new Float32Array(4096 * this.timeSamples.length);
             for (var i = 0; i < this.timeSamples.length; i ++) {

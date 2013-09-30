@@ -9,3 +9,8 @@ h1 {
 .container canvas {
     padding: 20px;
     }
+
+#noteFrequency {
+    color: yellow;
+    font-size: 32px;
+}

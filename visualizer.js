@@ -3,6 +3,7 @@ define(function() {
     var canvas1 = document.getElementById('visualizerCanvas1');
     var canvas2 = document.getElementById('visualizerCanvas2');
     var canvas3 = document.getElementById('visualizerCanvas3');
+    var noteFrequency = document.getElementById('noteFrequency');
 
     function drawWave(wave) {
         var ctx = setUpCanvas(canvas1);
@@ -22,7 +23,14 @@ define(function() {
         }
     }
 
-    function drawNote(wave) {
+    function drawNote(note) {
+        while( noteFrequency.firstChild ) {
+            noteFrequency.removeChild( noteFrequency.firstChild );
+        }
+        noteFrequency.appendChild( document.createTextNode(note.pitch.frequency + ' Hz'));
+
+        var wave = note.getWave();
+
         var ctx = setUpCanvas(canvas3);
         var x = 1024/wave.length;
         var y = 256;
